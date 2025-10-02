@@ -51,8 +51,7 @@ module.exports = (client, collections) => {
         theme: "light",
         balance: 0,
       };
-
-      // const profile = await profiles.insertOne(newProfile)
+      const { _id, ...rest } = newProfile
 
       const userId = result.insertedId;
 
@@ -71,7 +70,9 @@ module.exports = (client, collections) => {
         { expiresIn: "1h" }
       );
 
-      return res.json({ message: "User registered successfully", token });
+      return res
+        .status(200)
+        .json({ message: "User registered successfully", token, profile: rest });
     } catch (error) {
       await session.abortTransaction();
       console.error("Registration failed:", error);
@@ -112,7 +113,9 @@ module.exports = (client, collections) => {
         { expiresIn: "1h" }
       );
 
-      return res.json({ message: "User logged in successfully", token });
+      return res
+        .status(200)
+        .json({ message: "User logged in successfully", token });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Internal server error" });
@@ -136,8 +139,10 @@ module.exports = (client, collections) => {
         return res.status(401).json({ error: "Profile does not exist" });
       }
 
+      const { _id, ...rest } = profile
+
       return res.json({
-        ...profile,
+        profile: rest,
       });
     } catch (error) {
       console.error(error);
@@ -189,9 +194,10 @@ module.exports = (client, collections) => {
       if (!storeDoc) {
         return res.status(401).json({ error: "Store does not exist" });
       }
+      const { _id, ...rest } = storeDoc
       // Return inventory data
       return res.json({
-        ...storeDoc,
+        store: rest,
       });
     } catch (error) {
       console.error(error);
@@ -242,7 +248,8 @@ module.exports = (client, collections) => {
         res.status(401).json({ error: "Purchases do not exist" });
       }
       // Return purchases data
-      return res.json({ purchases: purchasesList.purchases });
+      const { _id, ...rest } = purchasesList
+      return res.json({ purchases: rest });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Internal server error" });
