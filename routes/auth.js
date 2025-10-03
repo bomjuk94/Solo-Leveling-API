@@ -51,7 +51,7 @@ module.exports = (client, collections) => {
         theme: "light",
         balance: 0,
       };
-      const { _id, ...rest } = newProfile
+      const { _id, ...rest } = newProfile;
 
       const userId = result.insertedId;
 
@@ -70,9 +70,11 @@ module.exports = (client, collections) => {
         { expiresIn: "1h" }
       );
 
-      return res
-        .status(200)
-        .json({ message: "User registered successfully", token, profile: rest });
+      return res.status(200).json({
+        message: "User registered successfully",
+        token,
+        profile: rest,
+      });
     } catch (error) {
       await session.abortTransaction();
       console.error("Registration failed:", error);
@@ -139,10 +141,10 @@ module.exports = (client, collections) => {
         return res.status(401).json({ error: "Profile does not exist" });
       }
 
-      const { _id, ...rest } = profile
+      const { _id, ...rest } = profile;
 
       return res.json({
-        profile: rest,
+        ...rest,
       });
     } catch (error) {
       console.error(error);
@@ -194,10 +196,10 @@ module.exports = (client, collections) => {
       if (!storeDoc) {
         return res.status(401).json({ error: "Store does not exist" });
       }
-      const { _id, ...rest } = storeDoc
+      const { _id, ...rest } = storeDoc;
       // Return inventory data
       return res.json({
-        store: rest,
+        ...rest.store,
       });
     } catch (error) {
       console.error(error);
@@ -248,8 +250,9 @@ module.exports = (client, collections) => {
         res.status(401).json({ error: "Purchases do not exist" });
       }
       // Return purchases data
-      const { _id, ...rest } = purchasesList
-      return res.json({ purchases: rest });
+
+      const { _id, ...rest } = purchasesList;
+      return res.json({ ...rest.purchases });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Internal server error" });
