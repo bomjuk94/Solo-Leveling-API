@@ -115,9 +115,19 @@ module.exports = (client, collections) => {
         { expiresIn: "1h" }
       );
 
-      return res
-        .status(200)
-        .json({ message: "User logged in successfully", token });
+      const profile = await profiles.findOne({ _id: user._id });
+
+      if (!profile) {
+        return res.status(401).json({ error: "Profile does not exist" });
+      }
+
+      const { _id, ...rest } = profile;
+
+      return res.status(200).json({
+        message: "User logged in successfully",
+        token,
+        profile: rest,
+      });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Internal server error" });
