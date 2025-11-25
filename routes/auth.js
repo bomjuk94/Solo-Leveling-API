@@ -46,6 +46,10 @@ module.exports = (client, collections) => {
         _id: result.insertedId,
         username: usernameCaseInsensitive,
         onBoarded: false,
+        timezone: '',
+        selectedClass: '',
+        customDescription: '',
+        profileImage: null,
         createdAt,
         lastActive: createdAt,
         theme: "light",
@@ -298,8 +302,7 @@ module.exports = (client, collections) => {
   router.put("/profile/update", authenticateToken, async (req, res) => {
     const { ObjectId } = require("bson");
     const userId = new ObjectId(req.user.userId);
-    const { updatedProfile } = req.body;
-    const { _id, ...profileWithoutId } = updatedProfile;
+    const updatedProfile = req.body.updatedProfile;
 
     try {
       const user = await users.findOne({ _id: userId });
@@ -309,12 +312,12 @@ module.exports = (client, collections) => {
 
       const profile = await profiles.findOne({ _id: userId });
       if (!profile) {
-        return res.status(401).json({ error: "profile does not exist" });
+        return res.status(401).json({ error: "Profile does not exist" });
       }
 
-      const response = await profiles.replaceOne(
+      const response = await profiles.updateOne(
         { _id: userId },
-        { ...profileWithoutId }
+        { $set: updatedProfile }
       );
 
       if (response.matchedCount === 0) {
@@ -323,6 +326,7 @@ module.exports = (client, collections) => {
 
       res.json({ message: "Profile updated successfully" });
     } catch (error) {
+      console.error(error);
       return res.status(500).json({ error: "Internal server error" });
     }
   });
