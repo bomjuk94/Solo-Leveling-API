@@ -7,9 +7,7 @@ const app = express();
 console.log('server is starting');
 
 const allowedOrigins = [
-    // TODO: Update origins
     'http://localhost:5173',
-    // ⚠️ Origins include protocol — add https://
     'https://digital-garden-client-75iiekjbp-dennisk94s-projects.vercel.app',
     'https://digital-garden.bomjukim.com',
 ];
@@ -27,10 +25,11 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use(express.json());
+// ✅ FIX: increase body size limits BEFORE any routes
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ limit: "1mb", extended: true }));
 
-// === DEV SIMULATION MIDDLEWARE (pick one of the options above) ===
-// after app.use(express.json())
+// === DEV SIMULATION MIDDLEWARE ===
 if (process.env.NODE_ENV === 'development') {
     app.use((req, res, next) => {
         const ms = Number(req.headers['x-simulate-cold'] || 0);
@@ -44,7 +43,6 @@ if (process.env.NODE_ENV === 'development') {
         }
     });
 }
-// ================================================================
 
 const client = new MongoClient(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -57,7 +55,6 @@ client.connect()
 
         const userDataDB = client.db('userData');
         const authDB = client.db('auth');
-        const gameDataDB = client.db('gameData');
 
         const collections = {
             users: authDB.collection('users'),
